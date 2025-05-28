@@ -31,8 +31,8 @@
       margin-top: 32px;
       margin-bottom: 0;
       text-shadow:
-        0 0 6px #fff,
-        0 0 16px #fff2;
+        0 0 4px #fff,
+        0 0 10px #fff2;
       opacity: 0;
       transform: scale(0.96);
       animation: fadeInScale 1.2s cubic-bezier(.23,1.12,.64,1) forwards;
@@ -46,11 +46,132 @@
         transform: scale(1);
       }
     }
+
+    .robot-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      margin-top: 48px;
+      height: 240px;
+    }
+
+    .robot {
+      position: relative;
+      width: 120px;
+      height: 180px;
+      animation: robot-bounce 2s infinite cubic-bezier(.55,.06,.68,.19);
+    }
+
+    @keyframes robot-bounce {
+      0%, 100% { transform: translateY(0);}
+      50% { transform: translateY(-20px);}
+    }
+
+    .robot-head {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 70px;
+      height: 70px;
+      background: #222;
+      border-radius: 18px 18px 22px 22px / 18px 18px 30px 30px;
+      transform: translateX(-50%);
+      border: 3px solid #fff;
+      box-shadow: 0 0 10px #fff2;
+      z-index: 2;
+    }
+
+    .robot-eye {
+      position: absolute;
+      top: 28px;
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border-radius: 50%;
+      left: 18px;
+      box-shadow: 22px 0 0 0 #fff;
+      animation: blink 3s infinite;
+    }
+
+    @keyframes blink {
+      0%, 90%, 100% { height: 12px; }
+      95% { height: 2px; }
+    }
+
+    .robot-body {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      width: 54px;
+      height: 70px;
+      background: #222;
+      border-radius: 16px 16px 24px 24px / 18px 18px 34px 34px;
+      transform: translateX(-50%);
+      border: 3px solid #fff;
+      box-shadow: 0 0 10px #fff2;
+    }
+
+    .robot-arm {
+      position: absolute;
+      top: 70px;
+      width: 16px;
+      height: 54px;
+      background: #222;
+      border: 3px solid #fff;
+      border-radius: 16px;
+      z-index: 1;
+      box-shadow: 0 0 10px #fff1;
+    }
+    .robot-arm.left {
+      left: 0;
+      transform: rotate(-18deg);
+      animation: arm-wave 2s infinite;
+      transform-origin: top right;
+    }
+    .robot-arm.right {
+      right: 0;
+      transform: rotate(18deg);
+      animation: arm-wave 2s infinite reverse;
+      transform-origin: top left;
+    }
+
+    @keyframes arm-wave {
+      0%,100% { transform: rotate(-18deg);}
+      50% { transform: rotate(-40deg);}
+    }
+
+    .robot-arm.right {
+      animation-direction: reverse;
+      left: auto;
+    }
+
+    .robot-leg {
+      position: absolute;
+      bottom: 0;
+      width: 14px;
+      height: 44px;
+      background: #222;
+      border: 3px solid #fff;
+      border-radius: 16px;
+      left: 28px;
+      box-shadow: 22px 0 0 0 #222, 22px 0 0 0 3px #fff;
+    }
   </style>
 </head>
 <body>
   <h1 class="glow-text">
     L’IA, c’est maintenant.
   </h1>
+  <div class="robot-container">
+    <div class="robot">
+      <div class="robot-head">
+        <div class="robot-eye"></div>
+      </div>
+      <div class="robot-body"></div>
+      <div class="robot-arm left"></div>
+      <div class="robot-arm right"></div>
+      <div class="robot-leg"></div>
+    </div>
+  </div>
 </body>
 </html>
