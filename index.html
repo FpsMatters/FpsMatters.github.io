@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>IA Premium - Robot Scroll Demo</title>
+  <title>IA Premium - Robot Spotlight</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     @font-face {
@@ -16,11 +16,19 @@
       background: #000;
       color: #fff;
       font-family: 'SF Pro Text', 'Segoe UI', Arial, sans-serif;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
       min-height: 100vh;
-      overflow-x: hidden;
     }
     h1 {
-      margin: 32px 0 0;
+      margin: 48px 0 0;
       font-size: clamp(2.5rem, 7vw, 5rem);
       font-weight: 700;
       text-align: center;
@@ -28,202 +36,203 @@
       text-shadow: 0 0 6px #fff, 0 0 16px #fff2;
       user-select: none;
       line-height: 1.2;
-      animation: fadeInScale 1.2s cubic-bezier(.23,1.12,.64,1) forwards;
-      opacity: 0;
-      transform: scale(0.96);
-      position: relative;
+      opacity: 1;
       z-index: 2;
+      transition: opacity 1s;
     }
-    @keyframes fadeInScale {
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    .scroll-section {
-      width: 100vw;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 80px;
-      margin-bottom: 200px;
-      position: relative;
-    }
-
-    .row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 320px;
-      width: 100vw;
-      position: relative;
-      margin-bottom: 60px;
-      transition: background 0.5s;
-    }
-
-    .row.active {
-      background: radial-gradient(ellipse at center, rgba(0,234,255,0.10) 0%, rgba(0,0,0,0) 80%);
-    }
-
-    .robot-canvas-wrapper {
+    #robot-canvas {
+      display: block;
+      position: absolute;
+      left: 50%;
+      top: 50%;
       width: 320px;
       height: 320px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      transform: translate(-50%, -30%);
       z-index: 2;
-      transition: filter 0.5s;
+      transition: left 1.2s cubic-bezier(.77,0,.18,1), top 1.2s cubic-bezier(.77,0,.18,1);
+      pointer-events: none;
     }
-
+    .spotlight {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 520px;
+      height: 320px;
+      transform: translate(-50%, -30%);
+      background: radial-gradient(ellipse at 60% 50%, #00eaff 0%, #00eaff22 70%, transparent 100%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+      transition: 
+        left 1.2s cubic-bezier(.77,0,.18,1),
+        top 1.2s cubic-bezier(.77,0,.18,1),
+        opacity 0.8s cubic-bezier(.77,0,.18,1);
+      filter: blur(0.5px);
+    }
     .desc-box {
-      min-width: 260px;
-      max-width: 400px;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      min-width: 280px;
+      max-width: 440px;
       min-height: 120px;
-      margin: 0 32px;
       border-radius: 24px;
       background: rgba(255,255,255,0.06);
       border: 2px solid rgba(255,255,255,0.13);
       box-shadow: 0 0 24px 0 rgba(0,0,0,0.18);
       font-size: 1.3rem;
       color: #fff;
-      opacity: 0.3;
+      opacity: 0;
       filter: blur(2px);
-      pointer-events: none;
-      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.6s cubic-bezier(.5,1.5,.5,1), box-shadow 0.6s, border 0.6s, opacity 0.4s, filter 0.4s;
+      padding: 32px 32px;
+      transform: translate(-50%, -30%);
+      z-index: 3;
+      transition: 
+        left 1.2s cubic-bezier(.77,0,.18,1),
+        top 1.2s cubic-bezier(.77,0,.18,1),
+        opacity 0.7s cubic-bezier(.77,0,.18,1),
+        filter 0.7s cubic-bezier(.77,0,.18,1);
+      pointer-events: none;
     }
-    .row.active .desc-box {
-      background: rgba(255,255,255,0.18);
-      border: 2.5px solid #00eaff;
-      box-shadow: 0 0 48px 0 #00eaff88, 0 0 0 4px #fff3;
+    .desc-box.visible {
       opacity: 1;
       filter: none;
-      color: #fff;
-      pointer-events: auto;
+      transition-delay: 0.4s;
     }
-
-    .desc-text {
-      opacity: 0;
-      transition: opacity 0.7s;
+    /* After animation, move everything to the left */
+    body.activated #robot-canvas {
+      left: 22vw;
+      top: 62vh;
+      transform: translate(0, -50%);
     }
-    .row.active .desc-text {
+    body.activated .spotlight {
+      left: 28vw;
+      top: 62vh;
       opacity: 1;
-      transition: opacity 0.7s 0.25s;
+      transition-delay: 0.3s;
     }
-
-    /* Alternate left/right rows */
-    .row.left .robot-canvas-wrapper { order: 1; }
-    .row.left .desc-box { order: 2; }
-    .row.right .robot-canvas-wrapper { order: 2; }
-    .row.right .desc-box { order: 1; }
-
+    body.activated .desc-box {
+      left: 45vw;
+      top: 62vh;
+      opacity: 1;
+      filter: none;
+      transition-delay: 0.6s;
+    }
+    body.activated h1 {
+      opacity: 0.18;
+    }
     @media (max-width: 900px) {
-      .row { flex-direction: column !important; min-height: 420px; }
-      .robot-canvas-wrapper { width: 70vw; height: 70vw; min-width: 180px; min-height: 180px; }
-      .desc-box { margin: 24px 0; }
-      .row.left .robot-canvas-wrapper, .row.right .robot-canvas-wrapper { order: 1; }
-      .row.left .desc-box, .row.right .desc-box { order: 2; }
+      #robot-canvas, .spotlight, .desc-box {
+        width: 180px !important;
+        min-width: 120px;
+        height: 180px !important;
+        padding: 16px 8px;
+        font-size: 1.05rem;
+      }
+      body.activated #robot-canvas,
+      body.activated .spotlight,
+      body.activated .desc-box {
+        left: 10vw;
+        top: 70vh;
+      }
+      body.activated .desc-box { left: 37vw; }
+      body.activated .spotlight { left: 15vw; }
     }
   </style>
 </head>
 <body>
   <h1>L’IA, c’est maintenant.</h1>
-  <div class="scroll-section">
-    <div class="row left active" id="row0">
-      <div class="robot-canvas-wrapper"><canvas id="robot-canvas-0"></canvas></div>
-      <div class="desc-box"><span class="desc-text">[Votre premier service ou valeur ajoutée]</span></div>
-    </div>
-    <div class="row right" id="row1">
-      <div class="robot-canvas-wrapper"><canvas id="robot-canvas-1"></canvas></div>
-      <div class="desc-box"><span class="desc-text">[Votre deuxième service ou explication]</span></div>
-    </div>
-    <div class="row left" id="row2">
-      <div class="robot-canvas-wrapper"><canvas id="robot-canvas-2"></canvas></div>
-      <div class="desc-box"><span class="desc-text">[Votre appel à l’action ou conclusion]</span></div>
-    </div>
-  </div>
+  <canvas id="robot-canvas" width="320" height="320"></canvas>
+  <div class="spotlight"></div>
+  <div class="desc-box">[Votre premier service ou valeur ajoutée]</div>
 
   <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/GLTFLoader.js"></script>
   <script>
-    // --- 3D Robot Loader for all rows ---
-    function createRobot(canvas) {
-      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-      renderer.setClearColor(0x000000, 0);
-      renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+    // --- 3D Robot Setup ---
+    const canvas = document.getElementById('robot-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setClearColor(0x000000, 0);
+    renderer.setSize(canvas.width, canvas.height);
 
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(35, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
-      camera.position.set(0, 1.2, 3.5);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, canvas.width / canvas.height, 0.1, 1000);
+    camera.position.set(0, 1.2, 3.5);
 
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-      scene.add(ambientLight);
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
-      directionalLight.position.set(5, 10, 7);
-      scene.add(directionalLight);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    directionalLight.position.set(5, 10, 7);
+    scene.add(directionalLight);
 
-      let robot;
-      const loader = new THREE.GLTFLoader();
-      loader.load(
-        'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/RobotExpressive/glTF/RobotExpressive.glb',
-        (gltf) => {
-          robot = gltf.scene;
-          robot.scale.set(0.7, 0.7, 0.7);
-          robot.position.y = -0.8;
-          scene.add(robot);
-          animate();
-        }
-      );
-
-      let clock = new THREE.Clock();
-      function animate() {
-        requestAnimationFrame(animate);
-        const elapsed = clock.getElapsedTime();
-        if (robot) {
-          robot.rotation.y = Math.sin(elapsed * 0.5) * 0.3;
-          robot.position.y = -0.8 + Math.sin(elapsed * 2) * 0.05;
-        }
-        renderer.render(scene, camera);
+    let robot;
+    const loader = new THREE.GLTFLoader();
+    loader.load(
+      'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/RobotExpressive/glTF/RobotExpressive.glb',
+      (gltf) => {
+        robot = gltf.scene;
+        robot.scale.set(0.7, 0.7, 0.7);
+        robot.position.y = -0.8;
+        scene.add(robot);
+        animate();
       }
+    );
 
-      // Responsive
-      function resizeCanvas() {
-        const width = canvas.parentElement.clientWidth;
-        const height = canvas.parentElement.clientHeight;
-        renderer.setSize(width, height);
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
+    let clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const elapsed = clock.getElapsedTime();
+      if (robot) {
+        robot.rotation.y = Math.sin(elapsed * 0.5) * 0.3;
+        robot.position.y = -0.8 + Math.sin(elapsed * 2) * 0.05;
       }
-      window.addEventListener('resize', resizeCanvas);
+      renderer.render(scene, camera);
     }
 
-    // Create a robot for each row
-    for (let i = 0; i < 3; i++) {
-      createRobot(document.getElementById('robot-canvas-' + i));
+    // --- Responsive ---
+    function resizeCanvas() {
+      let w = 320, h = 320;
+      if (window.innerWidth < 900) { w = h = 180; }
+      canvas.width = w;
+      canvas.height = h;
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
     }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
     // --- Scroll Activation Logic ---
-    const rows = Array.from(document.querySelectorAll('.row'));
-    function activateRowOnScroll() {
-      const triggerLine = window.innerHeight / 2;
-      let foundActive = false;
-      rows.forEach((row, idx) => {
-        const rect = row.getBoundingClientRect();
-        if (!foundActive && rect.top < triggerLine && rect.bottom > triggerLine / 1.5) {
-          row.classList.add('active');
-          foundActive = true;
-        } else {
-          row.classList.remove('active');
-        }
-      });
+    let activated = false;
+    function activateScene() {
+      if (activated) return;
+      activated = true;
+      document.body.classList.add('activated');
+      setTimeout(() => {
+        document.querySelector('.desc-box').classList.add('visible');
+      }, 900);
     }
-    window.addEventListener('scroll', activateRowOnScroll);
-    window.addEventListener('resize', activateRowOnScroll);
-    setTimeout(activateRowOnScroll, 300);
+
+    // Only trigger on first scroll
+    let scrollDetected = false;
+    function onFirstScroll() {
+      if (!scrollDetected) {
+        scrollDetected = true;
+        activateScene();
+      }
+    }
+    window.addEventListener('wheel', onFirstScroll, { once: true });
+    window.addEventListener('touchstart', onFirstScroll, { once: true }); // for mobile
+
+    // Optional: Also trigger on down arrow or space
+    window.addEventListener('keydown', e => {
+      if (['ArrowDown',' ','PageDown'].includes(e.key)) {
+        onFirstScroll();
+      }
+    });
   </script>
 </body>
 </html>
