@@ -1,22 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Spline Model</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spline 3D Scene</title>
   <style>
-    body, html {
-      margin: 0;
-      height: 100%;
-      background-color: #000;
+    html, body {
+      margin: 0; 
+      padding: 0; 
+      height: 100%; 
+      width: 100%; 
+      overflow: hidden;
     }
     spline-viewer {
-      width: 100vw;
-      height: 100vh;
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    spline-viewer > img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
   </style>
-  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.97/build/spline-viewer.js"></script>
+  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.97/build/spline-viewer.js" async></script>
 </head>
 <body>
-  <spline-viewer url="https://prod.spline.design/cuM1TVuhv9vh16wN/scene.splinecode"></spline-viewer>
+  <spline-viewer url="https://prod.spline.design/cuM1TVuhv9vh16wN/scene.splinecode">
+    <img src="data:image/png;base64,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" />
+  </spline-viewer>
 </body>
 </html>
