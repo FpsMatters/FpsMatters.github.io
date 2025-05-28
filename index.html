@@ -30,7 +30,6 @@
       user-select: none;
       line-height: 1.2;
       z-index: 2;
-      transition: opacity 1s;
       position: relative;
     }
     #robot-container {
@@ -38,7 +37,6 @@
       margin: 40px auto 0 auto;
       position: relative;
       z-index: 2;
-      transition: left 1.2s cubic-bezier(.77,0,.18,1), top 1.2s cubic-bezier(.77,0,.18,1), transform 1.2s cubic-bezier(.77,0,.18,1);
       background: transparent;
     }
     #robot-canvas {
@@ -46,61 +44,16 @@
       display: block;
       background: transparent;
     }
-    #activate {
-      margin: 40px auto 0 auto;
-      padding: 16px 40px;
-      font-size: 1.3rem;
-      border-radius: 24px;
-      border: none;
-      background: #00eaff;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    #activate:active { background: #00b7c7; }
-    .spotlight, .desc-box { display: none; }
-    body.activated #robot-container { transform: translateX(-200px); }
-    body.activated .spotlight, body.activated .desc-box { display: block; }
-    .spotlight {
-      position: absolute;
-      left: 120px; top: 60px;
-      width: 320px; height: 320px;
-      background: radial-gradient(ellipse at 60% 50%, #00eaff 0%, #00eaff22 70%, transparent 100%);
-      opacity: 1;
-      z-index: 1;
-      pointer-events: none;
-      filter: blur(0.5px);
-    }
-    .desc-box {
-      position: absolute;
-      left: 320px; top: 120px;
-      min-width: 200px; max-width: 340px; min-height: 80px;
-      border-radius: 24px;
-      background: rgba(255,255,255,0.06);
-      border: 2px solid rgba(255,255,255,0.13);
-      box-shadow: 0 0 24px 0 rgba(0,0,0,0.18);
-      font-size: 1.1rem;
-      color: #fff;
-      opacity: 1;
-      filter: none;
-      display: flex; align-items: center; justify-content: center;
-      padding: 24px 24px;
-      z-index: 3;
-      pointer-events: none;
-    }
   </style>
 </head>
 <body>
   <h1>L’IA, c’est maintenant.</h1>
   <div id="robot-container">
     <canvas id="robot-canvas" width="320" height="320"></canvas>
-    <div class="spotlight"></div>
-    <div class="desc-box">[Votre premier service ou valeur ajoutée]</div>
   </div>
-  <button id="activate">Activer l’assistant</button>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/GLTFLoader.js"></script>
+  <!-- Use Three.js and GLTFLoader from r149 for compatibility -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/examples/js/loaders/GLTFLoader.js"></script>
   <script>
     // 3D Robot Setup
     const canvas = document.getElementById('robot-canvas');
@@ -121,7 +74,7 @@
     let robot;
     const loader = new THREE.GLTFLoader();
     loader.load(
-      'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/RobotExpressive/glTF/RobotExpressive.glb',
+      'https://rawcdn.githack.com/KhronosGroup/glTF-Sample-Models/master/2.0/RobotExpressive/glTF/RobotExpressive.glb',
       (gltf) => {
         robot = gltf.scene;
         robot.scale.set(0.7, 0.7, 0.7);
@@ -131,7 +84,7 @@
       },
       undefined,
       (err) => {
-        alert("Erreur de chargement du robot. Vérifiez votre connexion ou ouvrez ce fichier avec un serveur local.");
+        alert("Erreur de chargement du robot. Vérifiez votre connexion ou la politique CORS.");
       }
     );
 
@@ -145,22 +98,6 @@
       }
       renderer.render(scene, camera);
     }
-
-    // Responsive
-    function resizeCanvas() {
-      let w = 320, h = 320;
-      canvas.width = w; canvas.height = h;
-      renderer.setSize(w, h);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    // Activation
-    document.getElementById('activate').onclick = () => {
-      document.body.classList.add('activated');
-    };
   </script>
 </body>
 </html>
