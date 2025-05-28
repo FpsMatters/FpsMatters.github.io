@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>2</title>
+  <title>IA Premium - Robot Test</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     html, body {
@@ -13,6 +13,13 @@
       font-family: 'SF Pro Text', 'Segoe UI', Arial, sans-serif;
       overflow: hidden;
     }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+    }
     h1 {
       margin: 48px 0 0;
       font-size: clamp(2.5rem, 7vw, 5rem);
@@ -22,66 +29,65 @@
       text-shadow: 0 0 6px #fff, 0 0 16px #fff2;
       user-select: none;
       line-height: 1.2;
-      opacity: 1;
       z-index: 2;
       transition: opacity 1s;
       position: relative;
     }
     #robot-container {
-      position: absolute;
-      left: 50%; top: 50%;
-      transform: translate(-50%, -30%);
       width: 320px; height: 320px;
+      margin: 40px auto 0 auto;
+      position: relative;
       z-index: 2;
       transition: left 1.2s cubic-bezier(.77,0,.18,1), top 1.2s cubic-bezier(.77,0,.18,1), transform 1.2s cubic-bezier(.77,0,.18,1);
+      background: transparent;
     }
+    #robot-canvas {
+      width: 100%; height: 100%;
+      display: block;
+      background: transparent;
+    }
+    #activate {
+      margin: 40px auto 0 auto;
+      padding: 16px 40px;
+      font-size: 1.3rem;
+      border-radius: 24px;
+      border: none;
+      background: #00eaff;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #activate:active { background: #00b7c7; }
+    .spotlight, .desc-box { display: none; }
+    body.activated #robot-container { transform: translateX(-200px); }
+    body.activated .spotlight, body.activated .desc-box { display: block; }
     .spotlight {
       position: absolute;
-      left: 50%; top: 50%;
-      width: 520px; height: 320px;
-      transform: translate(-50%, -30%);
+      left: 120px; top: 60px;
+      width: 320px; height: 320px;
       background: radial-gradient(ellipse at 60% 50%, #00eaff 0%, #00eaff22 70%, transparent 100%);
-      opacity: 0;
+      opacity: 1;
       z-index: 1;
       pointer-events: none;
-      transition: left 1.2s cubic-bezier(.77,0,.18,1), top 1.2s cubic-bezier(.77,0,.18,1), opacity 0.8s cubic-bezier(.77,0,.18,1);
       filter: blur(0.5px);
     }
     .desc-box {
       position: absolute;
-      left: 50%; top: 50%;
-      min-width: 280px; max-width: 440px; min-height: 120px;
+      left: 320px; top: 120px;
+      min-width: 200px; max-width: 340px; min-height: 80px;
       border-radius: 24px;
       background: rgba(255,255,255,0.06);
       border: 2px solid rgba(255,255,255,0.13);
       box-shadow: 0 0 24px 0 rgba(0,0,0,0.18);
-      font-size: 1.3rem;
+      font-size: 1.1rem;
       color: #fff;
-      opacity: 0;
-      filter: blur(2px);
+      opacity: 1;
+      filter: none;
       display: flex; align-items: center; justify-content: center;
-      padding: 32px 32px;
-      transform: translate(-50%, -30%);
+      padding: 24px 24px;
       z-index: 3;
-      transition: left 1.2s cubic-bezier(.77,0,.18,1), top 1.2s cubic-bezier(.77,0,.18,1), opacity 0.7s cubic-bezier(.77,0,.18,1), filter 0.7s cubic-bezier(.77,0,.18,1);
       pointer-events: none;
-    }
-    .desc-box.visible { opacity: 1; filter: none; transition-delay: 0.4s; }
-    body.activated #robot-container {
-      left: 22vw; top: 62vh; transform: translate(0, -50%);
-    }
-    body.activated .spotlight {
-      left: 28vw; top: 62vh; opacity: 1; transition-delay: 0.3s;
-    }
-    body.activated .desc-box {
-      left: 45vw; top: 62vh; opacity: 1; filter: none; transition-delay: 0.6s;
-    }
-    body.activated h1 { opacity: 0.18; }
-    @media (max-width: 900px) {
-      #robot-container, .spotlight, .desc-box { width: 180px !important; height: 180px !important; min-width: 120px; padding: 16px 8px; font-size: 1.05rem; }
-      body.activated #robot-container, body.activated .spotlight, body.activated .desc-box { left: 10vw; top: 70vh; }
-      body.activated .desc-box { left: 37vw; }
-      body.activated .spotlight { left: 15vw; }
     }
   </style>
 </head>
@@ -89,9 +95,10 @@
   <h1>L’IA, c’est maintenant.</h1>
   <div id="robot-container">
     <canvas id="robot-canvas" width="320" height="320"></canvas>
+    <div class="spotlight"></div>
+    <div class="desc-box">[Votre premier service ou valeur ajoutée]</div>
   </div>
-  <div class="spotlight"></div>
-  <div class="desc-box">[Votre premier service ou valeur ajoutée]</div>
+  <button id="activate">Activer l’assistant</button>
   <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/GLTFLoader.js"></script>
   <script>
@@ -124,7 +131,7 @@
       },
       undefined,
       (err) => {
-        alert("Erreur de chargement du robot. Vérifiez votre connexion.");
+        alert("Erreur de chargement du robot. Vérifiez votre connexion ou ouvrez ce fichier avec un serveur local.");
       }
     );
 
@@ -142,7 +149,6 @@
     // Responsive
     function resizeCanvas() {
       let w = 320, h = 320;
-      if (window.innerWidth < 900) { w = h = 180; }
       canvas.width = w; canvas.height = h;
       renderer.setSize(w, h);
       camera.aspect = w / h;
@@ -151,25 +157,10 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // Scroll Activation Logic
-    let activated = false;
-    function activateScene() {
-      if (activated) return;
-      activated = true;
+    // Activation
+    document.getElementById('activate').onclick = () => {
       document.body.classList.add('activated');
-      setTimeout(() => {
-        document.querySelector('.desc-box').classList.add('visible');
-      }, 900);
-    }
-    // Only trigger on first scroll or touch or down arrow
-    function onFirstScroll() {
-      if (!activated) activateScene();
-    }
-    window.addEventListener('wheel', onFirstScroll, { once: true });
-    window.addEventListener('touchstart', onFirstScroll, { once: true });
-    window.addEventListener('keydown', e => {
-      if (['ArrowDown',' ','PageDown'].includes(e.key)) onFirstScroll();
-    });
+    };
   </script>
 </body>
 </html>
