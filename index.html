@@ -16,34 +16,23 @@
       margin: 0;
       padding: 0;
       background: #000;
-      height: 100vh;
       width: 100vw;
-      overflow-x: hidden;
+      height: 100vh;
       font-family: 'SF Pro Text', 'Segoe UI', Arial, sans-serif;
     }
 
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
     .glow-text {
-      margin: 0;
-      margin-top: 20px; /* spacing from top */
-      padding: 0 20px;
-      width: 100%;
-      max-width: 1200px;
-      color: #fff;
-      font-size: clamp(2.5rem, 6vw, 5.5rem);
-      font-weight: 700;
+      width: 100vw;
       text-align: center;
+      color: #fff;
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      font-weight: 700;
       letter-spacing: 0.01em;
+      margin-top: 32px;
+      margin-bottom: 0;
       text-shadow:
-        0 0 8px #fff,
-        0 0 20px #fff,
-        0 0 32px #fff2,
-        0 0 40px #fff1;
+        0 0 6px #fff,
+        0 0 16px #fff2;
       opacity: 0;
       transform: scale(0.96);
       animation: fadeInScale 1.2s cubic-bezier(.23,1.12,.64,1) forwards;
@@ -61,7 +50,7 @@
 </head>
 <body>
   <h1 class="glow-text">
-    Il est maintenant temps pour votre entreprise d'utiliser la force de l'IA.
+    L’IA, c’est maintenant.
   </h1>
 </body>
 </html>
