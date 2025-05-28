@@ -41,10 +41,10 @@
       }
     }
     #robot-section {
-      position: sticky;
-      top: 0;
+      position: fixed;
+      top: 60px;
       width: 100vw;
-      height: 350px;
+      height: 320px;
       z-index: 1;
       background: transparent;
       display: flex;
@@ -61,7 +61,7 @@
     .section {
       width: 100%;
       max-width: 600px;
-      margin: 120px auto 0;
+      margin: 240px auto 0;
       position: relative;
       min-height: 220px;
       display: flex;
@@ -130,6 +130,12 @@
       #robot-canvas { width: 90vw; height: 60vw; }
       .section { min-height: 180px; }
     }
+    /* Extra bottom space for scrolling */
+    body::after {
+      content: "";
+      display: block;
+      height: 400px;
+    }
   </style>
 </head>
 <body>
@@ -159,7 +165,7 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/GLTFLoader.js"></script>
   <script>
-    // --- 3D Robot Setup (same as before, simple animation) ---
+    // 3D Robot Setup
     const canvas = document.getElementById('robot-canvas');
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     renderer.setClearColor(0x000000, 0);
@@ -200,7 +206,7 @@
       renderer.render(scene, camera);
     }
 
-    // --- Scroll Activation Logic ---
+    // Scroll Activation Logic
     const descBoxes = [
       document.getElementById('desc1'),
       document.getElementById('desc2'),
@@ -208,10 +214,10 @@
     ];
 
     function activateBoxOnScroll() {
-      const triggerOffset = window.innerHeight / 2.2;
-      descBoxes.forEach((box, i) => {
+      const triggerLine = window.innerHeight / 2;
+      descBoxes.forEach((box) => {
         const rect = box.getBoundingClientRect();
-        if (rect.top < triggerOffset && rect.bottom > triggerOffset / 1.5) {
+        if (rect.top < triggerLine && rect.bottom > triggerLine/1.5) {
           box.classList.add('active');
         } else {
           box.classList.remove('active');
@@ -220,9 +226,9 @@
     }
     window.addEventListener('scroll', activateBoxOnScroll);
     window.addEventListener('resize', activateBoxOnScroll);
-    setTimeout(activateBoxOnScroll, 300); // Initial trigger
+    setTimeout(activateBoxOnScroll, 300);
 
-    // --- Responsive Three.js Canvas ---
+    // Responsive Three.js Canvas
     function resizeCanvas() {
       const width = canvas.parentElement.clientWidth;
       const height = canvas.parentElement.clientHeight;
@@ -231,23 +237,6 @@
       camera.updateProjectionMatrix();
     }
     window.addEventListener('resize', resizeCanvas);
-
-    // --- Optional: Scroll robot to follow active box ---
-    function robotFollowActiveBox() {
-      const robotSection = document.getElementById('robot-section');
-      let found = false;
-      descBoxes.forEach((box) => {
-        if (box.classList.contains('active')) {
-          const rect = box.getBoundingClientRect();
-          robotSection.style.top = (rect.top - 320) + 'px';
-          found = true;
-        }
-      });
-      if (!found) robotSection.style.top = '0px';
-    }
-    window.addEventListener('scroll', robotFollowActiveBox);
-    window.addEventListener('resize', robotFollowActiveBox);
-    setTimeout(robotFollowActiveBox, 300);
   </script>
 </body>
 </html>
