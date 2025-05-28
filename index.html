@@ -2,30 +2,16 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>1</title>
+  <title>2</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    @font-face {
-      font-family: 'SF Pro Text';
-      src: local('SF Pro Text'), local('SFProText-Regular');
-      font-weight: 700;
-      font-style: normal;
-    }
     html, body {
       margin: 0; padding: 0;
+      width: 100vw; height: 100vh;
       background: #000;
       color: #fff;
       font-family: 'SF Pro Text', 'Segoe UI', Arial, sans-serif;
-      width: 100vw;
-      height: 100vh;
       overflow: hidden;
-    }
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
     }
     h1 {
       margin: 48px 0 0;
@@ -39,43 +25,32 @@
       opacity: 1;
       z-index: 2;
       transition: opacity 1s;
+      position: relative;
     }
-    #robot-canvas {
-      display: block;
+    #robot-container {
       position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 320px;
-      height: 320px;
+      left: 50%; top: 50%;
       transform: translate(-50%, -30%);
+      width: 320px; height: 320px;
       z-index: 2;
-      transition: left 1.2s cubic-bezier(.77,0,.18,1), top 1.2s cubic-bezier(.77,0,.18,1);
-      pointer-events: none;
+      transition: left 1.2s cubic-bezier(.77,0,.18,1), top 1.2s cubic-bezier(.77,0,.18,1), transform 1.2s cubic-bezier(.77,0,.18,1);
     }
     .spotlight {
       position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 520px;
-      height: 320px;
+      left: 50%; top: 50%;
+      width: 520px; height: 320px;
       transform: translate(-50%, -30%);
       background: radial-gradient(ellipse at 60% 50%, #00eaff 0%, #00eaff22 70%, transparent 100%);
       opacity: 0;
-      pointer-events: none;
       z-index: 1;
-      transition: 
-        left 1.2s cubic-bezier(.77,0,.18,1),
-        top 1.2s cubic-bezier(.77,0,.18,1),
-        opacity 0.8s cubic-bezier(.77,0,.18,1);
+      pointer-events: none;
+      transition: left 1.2s cubic-bezier(.77,0,.18,1), top 1.2s cubic-bezier(.77,0,.18,1), opacity 0.8s cubic-bezier(.77,0,.18,1);
       filter: blur(0.5px);
     }
     .desc-box {
       position: absolute;
-      left: 50%;
-      top: 50%;
-      min-width: 280px;
-      max-width: 440px;
-      min-height: 120px;
+      left: 50%; top: 50%;
+      min-width: 280px; max-width: 440px; min-height: 120px;
       border-radius: 24px;
       background: rgba(255,255,255,0.06);
       border: 2px solid rgba(255,255,255,0.13);
@@ -84,60 +59,27 @@
       color: #fff;
       opacity: 0;
       filter: blur(2px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       padding: 32px 32px;
       transform: translate(-50%, -30%);
       z-index: 3;
-      transition: 
-        left 1.2s cubic-bezier(.77,0,.18,1),
-        top 1.2s cubic-bezier(.77,0,.18,1),
-        opacity 0.7s cubic-bezier(.77,0,.18,1),
-        filter 0.7s cubic-bezier(.77,0,.18,1);
+      transition: left 1.2s cubic-bezier(.77,0,.18,1), top 1.2s cubic-bezier(.77,0,.18,1), opacity 0.7s cubic-bezier(.77,0,.18,1), filter 0.7s cubic-bezier(.77,0,.18,1);
       pointer-events: none;
     }
-    .desc-box.visible {
-      opacity: 1;
-      filter: none;
-      transition-delay: 0.4s;
-    }
-    /* After animation, move everything to the left */
-    body.activated #robot-canvas {
-      left: 22vw;
-      top: 62vh;
-      transform: translate(0, -50%);
+    .desc-box.visible { opacity: 1; filter: none; transition-delay: 0.4s; }
+    body.activated #robot-container {
+      left: 22vw; top: 62vh; transform: translate(0, -50%);
     }
     body.activated .spotlight {
-      left: 28vw;
-      top: 62vh;
-      opacity: 1;
-      transition-delay: 0.3s;
+      left: 28vw; top: 62vh; opacity: 1; transition-delay: 0.3s;
     }
     body.activated .desc-box {
-      left: 45vw;
-      top: 62vh;
-      opacity: 1;
-      filter: none;
-      transition-delay: 0.6s;
+      left: 45vw; top: 62vh; opacity: 1; filter: none; transition-delay: 0.6s;
     }
-    body.activated h1 {
-      opacity: 0.18;
-    }
+    body.activated h1 { opacity: 0.18; }
     @media (max-width: 900px) {
-      #robot-canvas, .spotlight, .desc-box {
-        width: 180px !important;
-        min-width: 120px;
-        height: 180px !important;
-        padding: 16px 8px;
-        font-size: 1.05rem;
-      }
-      body.activated #robot-canvas,
-      body.activated .spotlight,
-      body.activated .desc-box {
-        left: 10vw;
-        top: 70vh;
-      }
+      #robot-container, .spotlight, .desc-box { width: 180px !important; height: 180px !important; min-width: 120px; padding: 16px 8px; font-size: 1.05rem; }
+      body.activated #robot-container, body.activated .spotlight, body.activated .desc-box { left: 10vw; top: 70vh; }
       body.activated .desc-box { left: 37vw; }
       body.activated .spotlight { left: 15vw; }
     }
@@ -145,14 +87,15 @@
 </head>
 <body>
   <h1>L’IA, c’est maintenant.</h1>
-  <canvas id="robot-canvas" width="320" height="320"></canvas>
+  <div id="robot-container">
+    <canvas id="robot-canvas" width="320" height="320"></canvas>
+  </div>
   <div class="spotlight"></div>
   <div class="desc-box">[Votre premier service ou valeur ajoutée]</div>
-
   <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/GLTFLoader.js"></script>
   <script>
-    // --- 3D Robot Setup ---
+    // 3D Robot Setup
     const canvas = document.getElementById('robot-canvas');
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     renderer.setClearColor(0x000000, 0);
@@ -178,6 +121,10 @@
         robot.position.y = -0.8;
         scene.add(robot);
         animate();
+      },
+      undefined,
+      (err) => {
+        alert("Erreur de chargement du robot. Vérifiez votre connexion.");
       }
     );
 
@@ -192,12 +139,11 @@
       renderer.render(scene, camera);
     }
 
-    // --- Responsive ---
+    // Responsive
     function resizeCanvas() {
       let w = 320, h = 320;
       if (window.innerWidth < 900) { w = h = 180; }
-      canvas.width = w;
-      canvas.height = h;
+      canvas.width = w; canvas.height = h;
       renderer.setSize(w, h);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
@@ -205,7 +151,7 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // --- Scroll Activation Logic ---
+    // Scroll Activation Logic
     let activated = false;
     function activateScene() {
       if (activated) return;
@@ -215,23 +161,14 @@
         document.querySelector('.desc-box').classList.add('visible');
       }, 900);
     }
-
-    // Only trigger on first scroll
-    let scrollDetected = false;
+    // Only trigger on first scroll or touch or down arrow
     function onFirstScroll() {
-      if (!scrollDetected) {
-        scrollDetected = true;
-        activateScene();
-      }
+      if (!activated) activateScene();
     }
     window.addEventListener('wheel', onFirstScroll, { once: true });
-    window.addEventListener('touchstart', onFirstScroll, { once: true }); // for mobile
-
-    // Optional: Also trigger on down arrow or space
+    window.addEventListener('touchstart', onFirstScroll, { once: true });
     window.addEventListener('keydown', e => {
-      if (['ArrowDown',' ','PageDown'].includes(e.key)) {
-        onFirstScroll();
-      }
+      if (['ArrowDown',' ','PageDown'].includes(e.key)) onFirstScroll();
     });
   </script>
 </body>
