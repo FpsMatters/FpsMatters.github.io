@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>IA Premium</title>
+  <title>IA Premium - Assistant Robot</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     @font-face {
@@ -12,31 +12,30 @@
       font-style: normal;
     }
     html, body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       background: #000;
-      width: 100vw;
-      height: 100vh;
+      color: #fff;
       font-family: 'SF Pro Text', 'Segoe UI', Arial, sans-serif;
       overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    .glow-text {
-      width: 100vw;
-      text-align: center;
-      color: #fff;
+    h1 {
+      margin: 20px 0 8px;
       font-size: clamp(2.5rem, 7vw, 5rem);
       font-weight: 700;
+      text-align: center;
       letter-spacing: 0.01em;
-      margin-top: 32px;
-      margin-bottom: 0;
-      text-shadow: 0 0 4px #fff, 0 0 10px #fff2;
-      opacity: 0;
-      transform: scale(0.96);
-      animation: fadeInScale 1.2s cubic-bezier(.23,1.12,.64,1) forwards;
+      text-shadow: 0 0 6px #fff, 0 0 16px #fff2;
       user-select: none;
       line-height: 1.2;
-      z-index: 2;
+      animation: fadeInScale 1.2s cubic-bezier(.23,1.12,.64,1) forwards;
+      opacity: 0;
+      transform: scale(0.96);
       position: relative;
+      z-index: 2;
     }
     @keyframes fadeInScale {
       to {
@@ -44,172 +43,143 @@
         transform: scale(1);
       }
     }
-    #robot-canvas {
-      display: block;
-      margin: 0 auto;
-      position: absolute;
-      left: 50%;
-      top: 100px;
-      transform: translateX(-50%);
-      z-index: 1;
+    #robot-container {
+      flex-grow: 1;
+      width: 100%;
+      max-width: 600px;
+      position: relative;
     }
-    @media (max-width: 600px) {
-      .glow-text { font-size: 2rem; }
-      #robot-canvas { width: 100vw !important; height: 60vw !important; top: 80px; }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      outline: none;
+    }
+    #text-bubble {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255 255 255 / 0.1);
+      border-radius: 24px;
+      padding: 14px 24px;
+      max-width: 90%;
+      font-size: 1.1rem;
+      color: #fff;
+      text-align: center;
+      box-shadow: 0 0 12px 2px rgba(255,255,255,0.15);
+      backdrop-filter: blur(8px);
+      user-select: none;
+      pointer-events: none;
+      font-weight: 600;
+      font-family: 'SF Pro Text', 'Segoe UI', Arial, sans-serif;
+      letter-spacing: 0.02em;
+      opacity: 0;
+      animation: fadeIn 1s forwards 1.5s;
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
     }
   </style>
 </head>
 <body>
-  <h1 class="glow-text">
-    L’IA, c’est maintenant.
-  </h1>
-  <canvas id="robot-canvas"></canvas>
+  <h1>L’IA, c’est maintenant.</h1>
+  <div id="robot-container">
+    <canvas id="robot-canvas"></canvas>
+    <div id="text-bubble">Bonjour ! Je suis votre assistant IA.</div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.154.0/examples/js/loaders/GLTFLoader.js"></script>
   <script>
-    // Responsive canvas sizing
-    function getCanvasSize() {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const size = Math.min(w, h - 120, 500);
-      return { width: size, height: size * 1.1 };
-    }
+    const container = document.getElementById('robot-container');
     const canvas = document.getElementById('robot-canvas');
-    let { width, height } = getCanvasSize();
-    canvas.width = width;
-    canvas.height = height;
+    let width = container.clientWidth;
+    let height = window.innerHeight - 120;
 
-    // Three.js scene setup
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(0, 1.2, 6);
-
+    // Renderer
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     renderer.setSize(width, height);
     renderer.setClearColor(0x000000, 0);
 
-    // Soft light
-    const ambient = new THREE.AmbientLight(0xffffff, 0.7);
-    scene.add(ambient);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
-    dirLight.position.set(3, 10, 10);
-    scene.add(dirLight);
+    // Scene & Camera
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 1000);
+    camera.position.set(0, 1.2, 3.5);
 
-    // Robot group
-    const robot = new THREE.Group();
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    directionalLight.position.set(5, 10, 7);
+    scene.add(directionalLight);
 
-    // Body
-    const bodyGeo = new THREE.CylinderGeometry(0.7, 0.9, 1.7, 32);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, metalness: 0.3, roughness: 0.5 });
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.position.y = 0;
-    robot.add(body);
+    // Load robot model (low-poly robot from Poly Pizza)
+    const loader = new THREE.GLTFLoader();
+    let robot;
+    loader.load(
+      'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/RobotExpressive/glTF/RobotExpressive.glb',
+      (gltf) => {
+        robot = gltf.scene;
+        robot.scale.set(0.7, 0.7, 0.7);
+        robot.position.y = -0.8;
+        scene.add(robot);
 
-    // Head
-    const headGeo = new THREE.SphereGeometry(0.7, 32, 32);
-    const headMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.5, roughness: 0.3 });
-    const head = new THREE.Mesh(headGeo, headMat);
-    head.position.y = 1.2;
-    robot.add(head);
-
-    // Eyes
-    const eyeGeo = new THREE.SphereGeometry(0.09, 16, 16);
-    const eyeMat = new THREE.MeshStandardMaterial({ color: 0x0099ff, emissive: 0x0099ff, emissiveIntensity: 0.7 });
-    const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
-    leftEye.position.set(-0.23, 1.28, 0.65);
-    const rightEye = leftEye.clone();
-    rightEye.position.x = 0.23;
-    robot.add(leftEye, rightEye);
-
-    // Blush (cute effect)
-    const blushGeo = new THREE.SphereGeometry(0.07, 16, 16);
-    const blushMat = new THREE.MeshStandardMaterial({ color: 0xff7eb9, emissive: 0xff7eb9, emissiveIntensity: 0.3 });
-    const leftBlush = new THREE.Mesh(blushGeo, blushMat);
-    leftBlush.position.set(-0.36, 1.1, 0.61);
-    const rightBlush = leftBlush.clone();
-    rightBlush.position.x = 0.36;
-    robot.add(leftBlush, rightBlush);
-
-    // Mouth
-    const mouthGeo = new THREE.TorusGeometry(0.16, 0.025, 16, 100, Math.PI);
-    const mouthMat = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.2, roughness: 0.7 });
-    const mouth = new THREE.Mesh(mouthGeo, mouthMat);
-    mouth.position.set(0, 1.05, 0.62);
-    mouth.rotation.x = Math.PI / 2;
-    robot.add(mouth);
-
-    // Antenna
-    const antennaGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.35, 16);
-    const antennaMat = new THREE.MeshStandardMaterial({ color: 0x0099ff, metalness: 0.8, roughness: 0.3 });
-    const antenna = new THREE.Mesh(antennaGeo, antennaMat);
-    antenna.position.set(0, 1.65, 0);
-    robot.add(antenna);
-
-    const antennaBallGeo = new THREE.SphereGeometry(0.09, 16, 16);
-    const antennaBallMat = new THREE.MeshStandardMaterial({ color: 0x0099ff, emissive: 0x0099ff, emissiveIntensity: 0.9 });
-    const antennaBall = new THREE.Mesh(antennaBallGeo, antennaBallMat);
-    antennaBall.position.set(0, 1.86, 0);
-    robot.add(antennaBall);
-
-    // Arms
-    const armGeo = new THREE.CylinderGeometry(0.09, 0.09, 0.8, 16);
-    const armMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.4, roughness: 0.4 });
-    const leftArm = new THREE.Mesh(armGeo, armMat);
-    leftArm.position.set(-0.95, 0.5, 0);
-    leftArm.rotation.z = Math.PI / 4;
-    const rightArm = leftArm.clone();
-    rightArm.position.x = 0.95;
-    rightArm.rotation.z = -Math.PI / 4;
-    robot.add(leftArm, rightArm);
-
-    // Legs
-    const legGeo = new THREE.CylinderGeometry(0.13, 0.13, 0.7, 16);
-    const legMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.4, roughness: 0.4 });
-    const leftLeg = new THREE.Mesh(legGeo, legMat);
-    leftLeg.position.set(-0.33, -1, 0);
-    const rightLeg = leftLeg.clone();
-    rightLeg.position.x = 0.33;
-    robot.add(leftLeg, rightLeg);
-
-    // Add to scene
-    scene.add(robot);
+        // Start animation loop after model loads
+        animate();
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading model:', error);
+      }
+    );
 
     // Animation variables
-    let blink = 0, blinkSpeed = 0.07, blinkTimer = 0, bounce = 0;
+    let clock = new THREE.Clock();
 
-    // Animate
     function animate() {
       requestAnimationFrame(animate);
+      const elapsed = clock.getElapsedTime();
 
-      // Bouncing
-      bounce += 0.025;
-      robot.position.y = Math.sin(bounce) * 0.12;
+      if (robot) {
+        // Slow rotation
+        robot.rotation.y = Math.sin(elapsed * 0.5) * 0.3;
 
-      // Head tilt
-      head.rotation.z = Math.sin(bounce) * 0.08;
-
-      // Arm wave
-      leftArm.rotation.x = Math.sin(bounce) * 0.25 + 0.1;
-      rightArm.rotation.x = -Math.sin(bounce) * 0.25 + 0.1;
-
-      // Blinking
-      blinkTimer += blinkSpeed;
-      if (blinkTimer > 2 * Math.PI) blinkTimer = 0;
-      let eyeScaleY = (Math.sin(blinkTimer) > 0.97) ? 0.2 : 1;
-      leftEye.scale.y = rightEye.scale.y = eyeScaleY;
+        // Slight bobbing up/down
+        robot.position.y = -0.8 + Math.sin(elapsed * 2) * 0.05;
+      }
 
       renderer.render(scene, camera);
     }
-    animate();
 
     // Responsive resize
     window.addEventListener('resize', () => {
-      const size = getCanvasSize();
-      width = size.width;
-      height = size.height;
+      width = container.clientWidth;
+      height = window.innerHeight - 120;
       renderer.setSize(width, height);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
     });
+
+    // Text bubble messages
+    const bubble = document.getElementById('text-bubble');
+    const messages = [
+      "Bonjour ! Je suis votre assistant IA.",
+      "Je peux vous guider pour booster votre entreprise.",
+      "Découvrez comment l'IA transforme votre activité.",
+      "Prêt à commencer ? Contactez-nous pour une consultation !"
+    ];
+    let msgIndex = 0;
+
+    function cycleMessages() {
+      bubble.style.opacity = 0;
+      setTimeout(() => {
+        msgIndex = (msgIndex + 1) % messages.length;
+        bubble.textContent = messages[msgIndex];
+        bubble.style.opacity = 1;
+      }, 600);
+    }
+    setInterval(cycleMessages, 6000);
   </script>
 </body>
 </html>
