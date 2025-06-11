@@ -1,178 +1,313 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function App() {
+  const [currentSection, setCurrentSection] = useState(0);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+  const [isScrolling, setIsScrolling] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  
+  const sectionRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
+  const containerRef = useRef(null);
+  const rafId = useRef(null);
+  const lastScrollTime = useRef(0);
+
+  // Mouse movement for parallax effect
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+      setMousePos({ x, y });
+      
+      // For cursor animation
+      setCursorPos({ x: e.clientX, y: e.clientY });
+    };
+    
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Optimized scroll tracking
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const now = Date.now();
+      if (now - lastScrollTime.current > 100) {
+        setIsScrolling(true);
+        lastScrollTime.current = now;
+        
+        setTimeout(() => {
+          setIsScrolling(false);
+        }, 150);
+      }
+
+      const scrollTop = container.scrollTop;
+      const windowHeight = window.innerHeight;
+      const totalHeight = windowHeight * 3; // First 3 sections
+      const progress = Math.min(scrollTop / totalHeight, 1);
+      setScrollProgress(progress);
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Optimized animation frame updates
+  useEffect(() => {
+    const updateAnimations = () => {
+      rafId.current = requestAnimationFrame(() => {
+        // Update animations here if needed
+        rafId.current = null;
+      });
+    };
+    
+    updateAnimations();
+    
+    return () => {
+      if (rafId.current) {
+        cancelAnimationFrame(rafId.current);
+      }
+    };
+  }, []);
+
+  // Cleanup animation frames on unmount
+  useEffect(() => {
+    return () => {
+      if (rafId.current) {
+        cancelAnimationFrame(rafId.current);
+      }
+    };
+  }, []);
+
+  // Morphing gradient mask
+  const getGradientMask = () => {
+    const { x, y } = mousePos;
+    const angle = (x * 180) - 90;
+    const scale = 1 + (scrollProgress * 0.5);
+    
+    return `linear-gradient(${angle}deg, 
+      transparent ${20 * (1 - scrollProgress)}%, 
+      white ${60 * (1 - scrollProgress * 0.5)}%)`;
+  };
+
   return (
-    <div className="bg-white text-gray-800 font-sans">
-      {/* Floating Dynamic News Ticker */}
-      <div className="fixed top-0 left-0 w-full bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 text-white z-50 shadow-md overflow-hidden">
-        <div className="ticker-container whitespace-nowrap py-2 px-4 animate-ticker">
-          <span className="inline-block font-medium text-sm sm:text-base">
-            📰 Weekly Market Report: AI Investments Rising | 🏆 ESCP HFA Wins Best Student Finance Club 2024 |
-            📊 New Research: Crypto Regulation Trends in Europe | 💼 Open Positions: Analyst Internships Now Hiring!
-          </span>
-        </div>
+    <div className="font-sans bg-black text-white overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Morphing gradient layer */}
+        <div 
+          className="absolute inset-0 opacity-20 transition-transform duration-500 ease-out"
+          style={{
+            background: `radial-gradient(circle at ${mousePos.x * 100}% ${mousePos.y * 100}%, 
+              rgba(79, 70, 229, 0.8), transparent 70%)`,
+            transform: `scale(${1 + scrollProgress * 0.2})`
+          }}
+        ></div>
+        
+        {/* Floating particles with optimized animation */}
+        {[...Array(10)].map((_, i) => {
+          const size = Math.random() * 10 + 5;
+          const speed = Math.random() * 0.5 + 0.2;
+          const delay = Math.random() * 5;
+          
+          return (
+            <div 
+              key={i}
+              className="absolute rounded-full bg-purple-500/30 backdrop-blur-sm will-change-transform"
+              style={{
+                width: `${size}px`,
+                height: `${size}px`,
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animation: `float ${speed * 10}s linear infinite`,
+                animationDelay: `${delay}s`,
+                opacity: 0.3 - (scrollProgress * 0.2),
+                transform: `translateY(${Math.sin(Date.now() / 1000 + i) * 5}px)`
+              }}
+            ></div>
+          );
+        })}
       </div>
 
-      {/* Hero Section */}
-      <section className="pt-20 pb-24 bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(129,140,248,0.1),transparent)]"></div>
-        <img src="https://placehold.co/180x60?text=ESCP+HFA" alt="Logo" className="mx-auto mb-8 drop-shadow-lg" />
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight max-w-4xl mx-auto mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
-          ESCP Hedge Fund Association
-        </h1>
-        <p className="text-lg md:text-xl max-w-2xl mx-auto mb-8 text-gray-600">
-          Empowering students through hands-on experience in hedge funds, alternative investments, and global markets.
-        </p>
-        <a href="#join" className="inline-block bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"> 
-          Join Our Community
-        </a>
-      </section>
+      {/* Cursor glow effect */}
+      <div 
+        className="fixed w-64 h-64 rounded-full pointer-events-none z-50 mix-blend-screen bg-gradient-to-br from-blue-400 to-purple-600 opacity-30 will-change-transform"
+        style={{
+          left: `${cursorPos.x - 128}px`,
+          top: `${cursorPos.y - 128}px`,
+          transition: 'opacity 0.2s ease-out'
+        }}
+      ></div>
 
-      {/* About Section */}
-      <section id="about" className="py-20 px-6 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">About Us</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div className="bg-white p-8 rounded-xl shadow-md border border-gray-100">
-              <h3 className="text-xl font-semibold mb-4 text-blue-600">Our Mission</h3>
-              <p className="text-gray-700 leading-relaxed">
-                The ESCP Hedge Fund Association is a student-led organization dedicated to bridging academic knowledge with practical experience in alternative investments. Founded in 2018, we've become a leading platform for students interested in hedge funds, private equity, and quantitative finance.
-              </p>
+      {/* Scrollable Container */}
+      <div 
+        ref={containerRef}
+        className="h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth"
+      >
+        {/* Hero Sections */}
+        {[0, 1, 2].map((i) => (
+          <section
+            key={i}
+            ref={sectionRefs[i]}
+            className={`snap-start min-h-screen flex items-center justify-center relative pb-10 transition-all duration-700 ${
+              currentSection === i ? 'opacity-100' : 'opacity-70'
+            }`}
+            style={{
+              transform: `translateY(${scrollProgress * (i * 15)}px)`,
+              filter: `blur(${scrollProgress * 1.5}px)`
+            }}
+          >
+            {/* Animated Background */}
+            <div className="absolute inset-0 opacity-10">
+              <div 
+                className={`absolute w-full h-1 transition-all duration-700 ease-out ${
+                  currentSection >= i ? 'scale-x-100' : 'scale-x-0'
+                }`}
+                style={{
+                  background: `linear-gradient(90deg, 
+                    rgba(59, 130, 246, ${1 - scrollProgress}), 
+                    rgba(124, 58, 237, ${0.5 + scrollProgress * 0.5}), 
+                    rgba(236, 72, 153, ${scrollProgress}))`
+                }}
+              ></div>
             </div>
-            <div className="bg-white p-8 rounded-xl shadow-md border border-gray-100">
-              <h3 className="text-xl font-semibold mb-4 text-blue-600">Our Vision</h3>
-              <p className="text-gray-700 leading-relaxed">
-                Our mission is to provide members with unparalleled access to industry professionals, hands-on investment experience, and exclusive networking opportunities through our annual events and partnerships with leading financial institutions.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* What We Do Section */}
-      <section id="what-we-do" className="py-20 px-6 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">What We Do</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Educational Workshops",
-                description: "Weekly sessions on portfolio management, risk assessment, and derivatives trading led by industry experts.",
-                icon: "📚"
-              },
-              {
-                title: "Live Trading Competitions",
-                description: "Participate in simulated trading contests with real-time market data and cash prizes for top performers.",
-                icon: "📈"
-              },
-              {
-                title: "Industry Networking",
-                description: "Exclusive access to our annual Hedge Fund Symposium and networking events with top fund managers.",
-                icon: "🤝"
-              }
-            ].map((item, idx) => (
-              <div key={idx} className="bg-white p-8 rounded-xl shadow hover:shadow-xl transition-shadow duration-300 border border-gray-100 group hover:border-blue-200">
-                <div className="text-3xl mb-4 text-blue-600">{item.icon}</div>
-                <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
-                <p className="text-gray-600">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Team Section */}
-      <section id="team" className="py-20 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">Meet Our Team</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {[
-              { name: "Alex Johnson", role: "President", image: "https://placehold.co/300x300?text=A" },
-              { name: "Sophie Müller", role: "Vice President", image: "https://placehold.co/300x300?text=S" },
-              { name: "Luca Moretti", role: "Head of Research", image: "https://placehold.co/300x300?text=L" },
-              { name: "Nina Patel", role: "Events Director", image: "https://placehold.co/300x300?text=N" },
-              { name: "Erik Schmidt", role: "Recruitment Lead", image: "https://placehold.co/300x300?text=E" },
-              { name: "Lena Dubois", role: "Marketing Head", image: "https://placehold.co/300x300?text=L" },
-              { name: "James Carter", role: "Operations Manager", image: "https://placehold.co/300x300?text=J" },
-              { name: "Yuki Tanaka", role: "Quantitative Analyst", image: "https://placehold.co/300x300?text=Y" }
-            ].map((member, idx) => (
-              <div key={idx} className="text-center group">
-                <div className="relative inline-block mb-4 transform transition-transform duration-300 group-hover:scale-105">
-                  <img
-                    src={member.image}
-                    alt={member.name}
-                    className="w-32 h-32 mx-auto rounded-full object-cover border-4 border-blue-500 shadow-md group-hover:border-blue-700 transition-colors duration-300"
-                  />
-                </div>
-                <h4 className="font-semibold text-lg">{member.name}</h4>
-                <p className="text-sm text-gray-500">{member.role}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How to Join Section */}
-      <section id="join" className="py-20 px-6 bg-gray-50">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">How to Join</h2>
-          <div className="bg-white p-8 md:p-10 rounded-xl shadow-md border border-gray-100">
-            <ol className="space-y-6 text-lg text-gray-700">
-              <li className="flex items-start">
-                <span className="inline-flex items-center justify-center w-8 h-8 mr-3 rounded-full bg-blue-600 text-white font-bold flex-shrink-0">1</span>
-                <span>Eligibility: Open to all ESCP students with a strong interest in finance.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="inline-flex items-center justify-center w-8 h-8 mr-3 rounded-full bg-blue-600 text-white font-bold flex-shrink-0">2</span>
-                <span>Application: Submit your CV and motivation letter via our recruitment portal.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="inline-flex items-center justify-center w-8 h-8 mr-3 rounded-full bg-blue-600 text-white font-bold flex-shrink-0">3</span>
-                <span>Assessment: Complete our quantitative reasoning test and case study analysis.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="inline-flex items-center justify-center w-8 h-8 mr-3 rounded-full bg-blue-600 text-white font-bold flex-shrink-0">4</span>
-                <span>Interview: Final stage interview with our recruitment committee.</span>
-              </li>
-            </ol>
-            <div className="mt-10 text-center">
-              <a
-                href="mailto:recruitment@escphfa.com"
-                className="inline-block bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 shadow-md hover:shadow-lg"
+            
+            {/* Animated Text with 3D Effect */}
+            <div 
+              className="relative text-center px-4 will-change-transform"
+              style={{
+                transform: `perspective(800px) rotateX(${(mousePos.y - 0.5) * 8 * (2 - i)}deg) rotateY(${(mousePos.x - 0.5) * 8 * (2 - i)}deg)`,
+                transition: 'transform 0.1s ease-out'
+              }}
+            >
+              <h1 
+                className={`text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 transition-all duration-500 ${
+                  currentSection >= i ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                style={{
+                  textShadow: `0 ${scrollProgress * 5}px ${scrollProgress * 10}px rgba(0,0,0,0.3)`
+                }}
               >
-                Apply Now
-              </a>
+                {i === 0 && "The future is here"}
+                {i === 1 && "Your competitors are on the AI race, outperforming better than ever."}
+                {i === 2 && "Falling behind? No worries. Are you ready to make the change?"}
+              </h1>
+              
+              {/* Text glow effect with optimized transform */}
+              <div 
+                className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-xl rounded-lg transition-transform duration-300"
+                style={{
+                  opacity: currentSection === i ? 0.3 : 0,
+                  transform: `scale(${1 + (mousePos.x * 0.15)})`
+                }}
+              ></div>
+            </div>
+            
+            {/* Scroll Indicator */}
+            {currentSection === i && i < 2 && (
+              <div className="absolute bottom-8 flex flex-col items-center animate-bounce">
+                <svg className="w-8 h-8 text-white mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+                <span className="text-sm text-gray-400">Scroll down</span>
+              </div>
+            )}
+          </section>
+        ))}
+
+        {/* Main Content Sections */}
+        <section 
+          ref={sectionRefs[3]} 
+          className="snap-start bg-gray-900"
+        >
+          {/* Rest of the website content */}
+          <div className="pt-20 pb-20">
+            <div className="container mx-auto px-6 text-center">
+              <h2 className="text-4xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">Empowering Your Business with AI</h2>
+              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                We help companies integrate artificial intelligence solutions to stay ahead in the competitive landscape.
+              </p>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Footer */}
-      <footer className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white py-10 px-6">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
-          <div>
-            <p>&copy; 2025 ESCP Hedge Fund Association. All rights reserved.</p>
+          {/* Services Section */}
+          <div id="services" className="py-20 bg-gray-800">
+            <div className="container mx-auto px-6">
+              <h2 className="text-3xl font-bold mb-12 text-center">Our Services</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="bg-gray-700 p-8 rounded-lg shadow-lg transform transition hover:scale-105 duration-300 hover:shadow-xl">
+                  <h3 className="text-xl font-semibold mb-4">AI Strategy Consulting</h3>
+                  <p className="text-gray-300">Develop a tailored AI strategy aligned with your business goals and industry trends.</p>
+                </div>
+                <div className="bg-gray-700 p-8 rounded-lg shadow-lg transform transition hover:scale-105 duration-300 hover:shadow-xl">
+                  <h3 className="text-xl font-semibold mb-4">Machine Learning Solutions</h3>
+                  <p className="text-gray-300">Implement cutting-edge machine learning models to drive innovation and efficiency.</p>
+                </div>
+                <div className="bg-gray-700 p-8 rounded-lg shadow-lg transform transition hover:scale-105 duration-300 hover:shadow-xl">
+                  <h3 className="text-xl font-semibold mb-4">AI Integration & Deployment</h3>
+                  <p className="text-gray-300">Seamlessly integrate AI capabilities into your existing workflows and systems.</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex space-x-6">
-            <a href="#" className="hover:text-blue-300 transition-colors">LinkedIn</a> 
-            <a href="#" className="hover:text-blue-300 transition-colors">Twitter</a>
-            <a href="#" className="hover:text-blue-300 transition-colors">Instagram</a>
-          </div>
-        </div>
-      </footer>
 
-      {/* CSS Animation for Ticker */}
-      <style jsx>{`
-        @keyframes ticker {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-100%); }
-        }
-        .animate-ticker {
-          display: inline-block;
-          white-space: nowrap;
-          animation: ticker 30s linear infinite;
-        }
-      `}</style>
+          {/* Why Choose Us */}
+          <div id="why-us" className="py-20 bg-gray-900">
+            <div className="container mx-auto px-6">
+              <h2 className="text-3xl font-bold mb-12 text-center">Why Choose Us?</h2>
+              <ul className="space-y-4 max-w-2xl mx-auto">
+                {[
+                  "Expert team of AI specialists and data scientists",
+                  "Proven track record with Fortune 500 companies",
+                  "End-to-end solutions from strategy to implementation",
+                  "Continuous support and optimization post-deployment"
+                ].map((item, index) => (
+                  <li key={index} className="flex items-start">
+                    <svg className="w-6 h-6 text-blue-500 mr-3 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Contact Section */}
+          <section id="contact" className="py-20 bg-gray-800">
+            <div className="container mx-auto px-6 text-center">
+              <h2 className="text-3xl font-bold mb-6">Get in Touch</h2>
+              <p className="text-gray-300 mb-8 max-w-2xl mx-auto">Ready to take your business to the next level with AI? Contact us today for a free consultation.</p>
+              <form className="max-w-xl mx-auto space-y-4">
+                <input type="text" placeholder="Your Name" className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-blue-500 focus:outline-none text-white" />
+                <input type="email" placeholder="Your Email" className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-blue-500 focus:outline-none text-white" />
+                <textarea placeholder="Your Message" rows="4" className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-blue-500 focus:outline-none text-white"></textarea>
+                <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg transition-colors duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+                  Send Message
+                </button>
+              </form>
+            </div>
+          </section>
+
+          {/* Footer */}
+          <footer className="bg-black text-white py-8">
+            <div className="container mx-auto px-6 text-center">
+              <p>&copy; 2023 AI Consultancy. All rights reserved.</p>
+            </div>
+          </footer>
+        </section>
+      </div>
+
+      {/* Custom Scroll Progress Indicator */}
+      <div className="fixed top-0 left-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 z-50 transform-gpu" 
+        style={{ 
+          width: `${scrollProgress * 100}%`, 
+          transition: 'width 0.1s ease-out'
+        }}>
+      </div>
     </div>
   );
 }
